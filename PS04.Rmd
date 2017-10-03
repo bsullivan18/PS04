@@ -25,6 +25,7 @@ Please indicate who you collaborated with on this assignment:
 
 ```{r, warning=FALSE}
 library(tidyverse)
+library(mosaic)
 credit <- read_csv("http://www-bcf.usc.edu/~gareth/ISL/Credit.csv") %>%
   select(-X1) %>%
   mutate(ID = 1:n()) %>% 
@@ -59,11 +60,64 @@ credit_test <- credit %>%
 ```{r, echo=TRUE, warning=FALSE, message=FALSE}
 # Placeholder vectors of length 7. For now, I've filled them with arbitrary 
 # values; you will fill these in
-RMSE_train <- runif(n=7)
-RMSE_test <- runif(n=7)
+
 
 
 # Do your work here:
+
+#get the lm's for each of the 7 formulas by modeling from the training set
+model1train_lm <- lm(model1_formula, data= credit_train)
+model2train_lm <- lm(model2_formula, data= credit_train)
+model3train_lm <- lm(model3_formula, data= credit_train)
+model4train_lm <- lm(model4_formula, data= credit_train)
+model5train_lm <- lm(model5_formula, data= credit_train)
+model6train_lm <- lm(model6_formula, data= credit_train)
+model7train_lm <- lm(model7_formula, data= credit_train)
+
+#calculate yhat for the training data by predicting the train values from the 7 lm's
+y_hattrain1 <- predict(model1train_lm, newdata=credit_train)
+y_hattrain2 <- predict(model2train_lm, newdata=credit_train)
+y_hattrain3 <- predict(model3train_lm, newdata=credit_train)
+y_hattrain4 <- predict(model4train_lm, newdata=credit_train)
+y_hattrain5 <- predict(model5train_lm, newdata=credit_train)
+y_hattrain6 <- predict(model6train_lm, newdata=credit_train)
+y_hattrain7 <- predict(model7train_lm, newdata=credit_train)
+
+#calculate the RMSE of the training set 
+RMSE_train1 <- sqrt(mean((credit_train$Balance - y_hattrain1)^2))
+RMSE_train2 <- sqrt(mean((credit_train$Balance - y_hattrain2)^2))
+RMSE_train3 <- sqrt(mean((credit_train$Balance - y_hattrain3)^2))
+RMSE_train4 <- sqrt(mean((credit_train$Balance - y_hattrain4)^2))
+RMSE_train5 <- sqrt(mean((credit_train$Balance - y_hattrain5)^2))
+RMSE_train6 <- sqrt(mean((credit_train$Balance - y_hattrain6)^2))
+RMSE_train7 <- sqrt(mean((credit_train$Balance - y_hattrain7)^2))
+
+#make vector containing the values of RMSE of the training set from all 7 formulas
+RMSE_train <- c(RMSE_train1, RMSE_train2, RMSE_train3, RMSE_train4, RMSE_train5, RMSE_train6, RMSE_train7)
+
+#####test
+
+#calculate yhat for the testing data by predicting the train values from the 7 lm's
+y_hattest1 <- predict(model1train_lm, newdata=credit_test)
+y_hattest2 <- predict(model2train_lm, newdata=credit_test)
+y_hattest3 <- predict(model3train_lm, newdata=credit_test)
+y_hattest4 <- predict(model4train_lm, newdata=credit_test)
+y_hattest5 <- predict(model5train_lm, newdata=credit_test)
+y_hattest6 <- predict(model6train_lm, newdata=credit_test)
+y_hattest7 <- predict(model7train_lm, newdata=credit_test)
+
+#calculate the RMSE of the testing set 
+RMSE_test1 <- sqrt(mean((credit_test$Balance - y_hattest1)^2))
+RMSE_test2 <- sqrt(mean((credit_test$Balance - y_hattest2)^2))
+RMSE_test3 <- sqrt(mean((credit_test$Balance - y_hattest3)^2))
+RMSE_test4 <- sqrt(mean((credit_test$Balance - y_hattest4)^2))
+RMSE_test5 <- sqrt(mean((credit_test$Balance - y_hattest5)^2))
+RMSE_test6 <- sqrt(mean((credit_test$Balance - y_hattest6)^2))
+RMSE_test7 <- sqrt(mean((credit_test$Balance - y_hattest7)^2))
+
+#make vector containing the values of RMSE of the testing set from all 7 formulas
+RMSE_test <- c(RMSE_test1, RMSE_test2, RMSE_test3, RMSE_test4, RMSE_test5, RMSE_test6, RMSE_test7)
+
 
 
 # Save results in a data frame. Note this data frame is in wide format.
@@ -94,6 +148,8 @@ ggplot(results, aes(x=num_coefficients, y=RMSE, col=type)) +
 
 Compare and contrast the two curves and hypothesize as to the root cause of any differences.
 
+The two curves follow roughly the same shape for the first four linear models, but go in opposite directions for the 5th, 6th, and 7th coefficients. The curves also display difference in the magnitude of the RMSE between the two sets of data.  The red curve, for the Test Data, is always above the teal curve, which represents the Training Data.  This implies that the RMSE for the model on the testing data is always greater than the RMSE for the model on the training data.  This is most likely because the model is based off of and fitted to the trainind data, which consists of only 20 points. The RMSE for the testing data is likely larger than that of the training data because the model isn't fitted to it, but is simply applied to it, which would yield a greater RMSE because of the greater variablity that is not accounted for by the model.  The two follow the same shape for the first four coefficients, however, because the model is fit from a fraction of the data of the credit dataset, which the testing set comes from as well, so it makes sense that the two follow the same shape but differ in magnitude. For the last three coefficients, the two curves go in slightly different directions because the model is likely overfit to the training data, so the out-of-sample predictive ability decreases for the testing data, which causes the RMSE to increase, as illustrated by the plot.
+
 
 
 # Bonus
@@ -103,5 +159,90 @@ from `credit` instead of 20. Now compare and contrast this graph with the
 one above and hypothesize as to the root cause of any differences.
 
 ```{r, echo=FALSE}
-
+set.seed(79)
+credit_train <- credit %>% 
+  sample_n(380)
+credit_test <- credit %>% 
+  anti_join(credit_train, by="ID")
 ```
+
+```{r}
+#get the lm's for each of the 7 formulas by modeling from the training set
+model1train_lm <- lm(model1_formula, data= credit_train)
+model2train_lm <- lm(model2_formula, data= credit_train)
+model3train_lm <- lm(model3_formula, data= credit_train)
+model4train_lm <- lm(model4_formula, data= credit_train)
+model5train_lm <- lm(model5_formula, data= credit_train)
+model6train_lm <- lm(model6_formula, data= credit_train)
+model7train_lm <- lm(model7_formula, data= credit_train)
+
+#calculate yhat for the training data by predicting the train values from the 7 lm's
+y_hattrain1 <- predict(model1train_lm, newdata=credit_train)
+y_hattrain2 <- predict(model2train_lm, newdata=credit_train)
+y_hattrain3 <- predict(model3train_lm, newdata=credit_train)
+y_hattrain4 <- predict(model4train_lm, newdata=credit_train)
+y_hattrain5 <- predict(model5train_lm, newdata=credit_train)
+y_hattrain6 <- predict(model6train_lm, newdata=credit_train)
+y_hattrain7 <- predict(model7train_lm, newdata=credit_train)
+
+#calculate the RMSE of the training set 
+RMSE_train1 <- sqrt(mean((credit_train$Balance - y_hattrain1)^2))
+RMSE_train2 <- sqrt(mean((credit_train$Balance - y_hattrain2)^2))
+RMSE_train3 <- sqrt(mean((credit_train$Balance - y_hattrain3)^2))
+RMSE_train4 <- sqrt(mean((credit_train$Balance - y_hattrain4)^2))
+RMSE_train5 <- sqrt(mean((credit_train$Balance - y_hattrain5)^2))
+RMSE_train6 <- sqrt(mean((credit_train$Balance - y_hattrain6)^2))
+RMSE_train7 <- sqrt(mean((credit_train$Balance - y_hattrain7)^2))
+
+#make vector containing the values of RMSE of the training set from all 7 formulas
+RMSE_train <- c(RMSE_train1, RMSE_train2, RMSE_train3, RMSE_train4, RMSE_train5, RMSE_train6, RMSE_train7)
+
+#####test
+
+#calculate yhat for the testing data by predicting the train values from the 7 lm's
+y_hattest1 <- predict(model1train_lm, newdata=credit_test)
+y_hattest2 <- predict(model2train_lm, newdata=credit_test)
+y_hattest3 <- predict(model3train_lm, newdata=credit_test)
+y_hattest4 <- predict(model4train_lm, newdata=credit_test)
+y_hattest5 <- predict(model5train_lm, newdata=credit_test)
+y_hattest6 <- predict(model6train_lm, newdata=credit_test)
+y_hattest7 <- predict(model7train_lm, newdata=credit_test)
+
+#calculate the RMSE of the testing set 
+RMSE_test1 <- sqrt(mean((credit_test$Balance - y_hattest1)^2))
+RMSE_test2 <- sqrt(mean((credit_test$Balance - y_hattest2)^2))
+RMSE_test3 <- sqrt(mean((credit_test$Balance - y_hattest3)^2))
+RMSE_test4 <- sqrt(mean((credit_test$Balance - y_hattest4)^2))
+RMSE_test5 <- sqrt(mean((credit_test$Balance - y_hattest5)^2))
+RMSE_test6 <- sqrt(mean((credit_test$Balance - y_hattest6)^2))
+RMSE_test7 <- sqrt(mean((credit_test$Balance - y_hattest7)^2))
+
+#make vector containing the values of RMSE of the testing set from all 7 formulas
+RMSE_test <- c(RMSE_test1, RMSE_test2, RMSE_test3, RMSE_test4, RMSE_test5, RMSE_test6, RMSE_test7)
+
+
+
+# Save results in a data frame. Note this data frame is in wide format.
+results <- data_frame(
+  num_coefficients = 1:7,
+  RMSE_train,
+  RMSE_test
+) 
+
+# Some cleaning of results
+results <- results %>% 
+  # More intuitive names:
+  rename(
+    `Training data` = RMSE_train,
+    `Test data` = RMSE_test
+  ) %>% 
+  # Convert results data frame to "tidy" data format i.e. long format, so that we
+  # can ggplot it
+  gather(type, RMSE, -num_coefficients)
+
+ggplot(results, aes(x=num_coefficients, y=RMSE, col=type)) +
+  geom_line() + 
+  labs(x="# of coefficients", y="RMSE", col="Data used to evaluate \nperformance of fitted model")
+```
+```
+In this model, the two curves are much closer to eachother and there isn't as large of a difference in the magniture of the RMSE.  This is because the models for the 7 different numbers of coefficients are fit from a training dataset that uses a much larger number of points than in the previous example.  This leads to the remaining testing set having less out of sample variability and, thus, the two curves are much more similar.
